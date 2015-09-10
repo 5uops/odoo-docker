@@ -42,6 +42,9 @@ COPY ./openerp/addons /usr/lib/python2.7/dist-packages/openerp/addons/
 # Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
+RUN chown odoo /var/lib/odoo
+RUN chown odoo /mnt/extra-addons
+
 # Expose Odoo services
 EXPOSE 8069 8071
 
