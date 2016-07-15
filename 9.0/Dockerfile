@@ -1,9 +1,14 @@
 FROM wenzizone/base
 MAINTAINER Odoo S.A. <info@odoo.com>
 
+ADD ./pgdg.list /etc/apt/sources.list.d/pgdg.list
+
+ENV POSTGRESQL_VER 9.4
+
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 RUN set -x; \
-        apt-get update \
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+        && apt-get update \
         && apt-get install -y --no-install-recommends \
             ca-certificates \
             curl \
@@ -14,6 +19,7 @@ RUN set -x; \
             python-support \
             ttf-wqy-zenhei \
             ttf-wqy-microhei \
+            postgresql-${POSTGRESQL_VER} \
         && curl -o wkhtmltox.deb -SL http://download.gna.org/wkhtmltopdf/0.12/0.12.1/wkhtmltox-0.12.1_linux-trusty-amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb \
         && apt-get -y install -f --no-install-recommends \
