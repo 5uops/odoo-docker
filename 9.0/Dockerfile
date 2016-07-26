@@ -27,7 +27,6 @@ RUN set -x; \
 
 # Install Odoo
 ENV ODOO_VERSION 9.0
-
 ENV ODOO_RELEASE 20160609
 RUN set -x; \
         curl -o odoo.deb -SL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}c.${ODOO_RELEASE}_all.deb \
@@ -35,6 +34,7 @@ RUN set -x; \
         && dpkg --force-depends -i odoo.deb \
         && apt-get update \
         && apt-get -y install -f --no-install-recommends \
+            postgresql-${POSTGRESQL_VER} \
         && rm -rf /var/lib/apt/lists/* odoo.deb
 
 # Copy entrypoint script and Odoo configuration file
@@ -49,12 +49,6 @@ COPY ./openerp/addons /usr/lib/python2.7/dist-packages/openerp/addons/
 # Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 RUN mkdir -p /mnt/extra-addons \
         && chown -R odoo /mnt/extra-addons
-
-# install postgresql
-RUN set -x; \
-        apt-get update \
-        && apt-get install -y --no-install-recommends postgresql-${POSTGRESQL_VER} \
-        && rm -rf /var/lib/apt/lists/*
 
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
