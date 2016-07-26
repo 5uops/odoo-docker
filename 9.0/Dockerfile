@@ -1,13 +1,36 @@
 FROM wenzizone/base
 MAINTAINER Odoo S.A. <info@odoo.com>
 
+ADD ./pgdg.list /etc/apt/sources.list.d/pgdg.list
+
+ENV POSTGRESQL_VER 9.4
+
+# Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
+RUN set -x; \
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+        && apt-get update \
+        && apt-get install -y --no-install-recommends \
+            ca-certificates \
+            curl \
+            node-less \
+            node-clean-css \
+            python-pyinotify \
+            python-renderpm \
+            python-support \
+            ttf-wqy-zenhei \
+            ttf-wqy-microhei \
+        && curl -o wkhtmltox.deb -SL http://download.gna.org/wkhtmltopdf/0.12/0.12.1/wkhtmltox-0.12.1_linux-trusty-amd64.deb \
+        && dpkg --force-depends -i wkhtmltox.deb \
+        && apt-get -y install -f --no-install-recommends \
+        && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false npm \
+        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
+
 # Install Odoo
 ENV ODOO_VERSION 9.0
 
 ENV ODOO_RELEASE 20160609
 RUN set -x; \
-        apt-get update \
-        && curl -o odoo.deb -SL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}c.${ODOO_RELEASE}_all.deb \
+        curl -o odoo.deb -SL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}c.${ODOO_RELEASE}_all.deb \
         && echo '56e7e5dc2525fd8c1522c05deb0f7f349a966260 odoo.deb' | sha1sum -c - \
         && dpkg --force-depends -i odoo.deb \
         && apt-get update \
@@ -27,31 +50,11 @@ COPY ./openerp/addons /usr/lib/python2.7/dist-packages/openerp/addons/
 RUN mkdir -p /mnt/extra-addons \
         && chown -R odoo /mnt/extra-addons
 
-
 # install postgresql
-ADD ./pgdg.list /etc/apt/sources.list.d/pgdg.list
-
-ENV POSTGRESQL_VER 9.4
 RUN set -x; \
-        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-        && apt-get update \
-        && apt-get install -y --no-install-recommends \
-            ca-certificates \
-            curl \
-            node-less \
-            node-clean-css \
-            python-pyinotify \
-            python-renderpm \
-            python-support \
-            ttf-wqy-zenhei \
-            ttf-wqy-microhei \
-            postgresql-${POSTGRESQL_VER} \
-        && curl -o wkhtmltox.deb -SL http://download.gna.org/wkhtmltopdf/0.12/0.12.1/wkhtmltox-0.12.1_linux-trusty-amd64.deb \
-        && dpkg --force-depends -i wkhtmltox.deb \
-        && apt-get -y install -f --no-install-recommends \
-        && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false npm \
-        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
-
+        apt-get update \
+        && apt-get install -y --no-install-recommends postgresql-${POSTGRESQL_VER} \
+        && rm -rf /var/lib/apt/lists/*
 
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
