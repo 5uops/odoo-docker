@@ -34,7 +34,7 @@ RUN set -x; \
         && dpkg --force-depends -i odoo.deb \
         && apt-get update \
         && apt-get -y install -f --no-install-recommends \
-            postgresql-${POSTGRESQL_VER} \
+        && apt-get -y install --no-install-recommends postgresql-${POSTGRESQL_VER} \
         && rm -rf /var/lib/apt/lists/* odoo.deb
 
 # Copy entrypoint script and Odoo configuration file
