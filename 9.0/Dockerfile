@@ -13,7 +13,8 @@ RUN set -x; \
             ca-certificates \
             curl \
             node-less \
-            node-clean-css \
+            python-gevent \
+            python-pip \
             python-pyinotify \
             python-renderpm \
             python-support \
@@ -23,14 +24,15 @@ RUN set -x; \
         && dpkg --force-depends -i wkhtmltox.deb \
         && apt-get -y install -f --no-install-recommends \
         && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false npm \
-        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
+        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb \
+        && pip install psycogreen==1.0
 
 # Install Odoo
 ENV ODOO_VERSION 9.0
-ENV ODOO_RELEASE 20160609
+ENV ODOO_RELEASE 20161123
 RUN set -x; \
         curl -o odoo.deb -SL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}c.${ODOO_RELEASE}_all.deb \
-        && echo '56e7e5dc2525fd8c1522c05deb0f7f349a966260 odoo.deb' | sha1sum -c - \
+        && echo 'c9e66e878146940ef188eaa8c9bc5da7e4306982 odoo.deb' | sha1sum -c - \
         && dpkg --force-depends -i odoo.deb \
         && apt-get update \
         && apt-get -y install -f --no-install-recommends \
